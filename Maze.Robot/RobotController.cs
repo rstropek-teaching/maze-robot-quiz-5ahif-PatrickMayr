@@ -1,4 +1,6 @@
 ﻿using Maze.Library;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace Maze.Solver
 {
@@ -8,6 +10,8 @@ namespace Maze.Solver
     public class RobotController
     {
         private IRobot robot;
+        private bool reachedEnd;
+        private HashSet<Point> visitedPoints;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobotController"/> class
@@ -17,6 +21,8 @@ namespace Maze.Solver
         {
             // Store robot for later use
             this.robot = robot;
+            this.reachedEnd = false;
+            this.visitedPoints = new HashSet<Point>();
         }
 
         /// <summary>
@@ -31,16 +37,69 @@ namespace Maze.Solver
         /// </remarks>
         public void MoveRobotToExit()
         {
-            // Here you have to add your code
+            robot.ReachedExit += (_, __) => this.reachedEnd = true;
 
-            // Trivial sample algorithm that can just move right
-            var reachedEnd = false;
-            robot.ReachedExit += (_, __) => reachedEnd = true;
-
-            while (!reachedEnd)
+            this.findExit(0, 0);
+            if (this.reachedEnd == false)
             {
-                robot.Move(Direction.Right);
+                this.robot.HaltAndCatchFire();
             }
         }
+
+        public void findExit(int x, int y)
+        {
+            //Solution 1: Finish
+            if (this.reachedEnd == false && this.visitedPoints.Add(new Point(x, y)))
+            {
+                //Right
+                bool status = this.robot.CanIMove(Direction.Right);
+                if (status && this.reachedEnd == false)
+                {
+                    this.robot.Move(Direction.Right);
+                    this.findExit(x + 1, y);
+                    if (this.reachedEnd == false)
+                    {
+                        this.robot.Move(Direction.Left);
+                    }
+                }
+
+                //Down
+                status = this.robot.CanIMove(Direction.Down);
+                if (status && this.reachedEnd == false)
+                {
+                    this.robot.Move(Direction.Down);
+                    this.findExit(x, y + 1);
+                    if (this.reachedEnd == false)
+                    {
+                        this.robot.Move(Direction.Up);
+                    }
+                }
+
+                //Left
+                status = this.robot.CanIMove(Direction.Left);
+                if (status && this.reachedEnd == false)
+                {
+                    this.robot.Move(Direction.Left);
+                    this.findExit(x - 1, y);
+                    if (this.reachedEnd == false)
+                    {
+                        this.robot.Move(Direction.Right);
+                    }
+                }
+
+                //Up
+                status = this.robot.CanIMove(Direction.Up);
+                if (status && this.reachedEnd == false)
+                {
+                    this.robot.Move(Direction.Up);
+                    this.findExit(x, y - 1);
+                    if (this.reachedEnd == false)
+                    {
+                        this.robot.Move(Direction.Down);
+                    }
+                }
+            }
+        }
+
     }
 }
