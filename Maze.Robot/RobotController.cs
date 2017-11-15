@@ -40,12 +40,15 @@ namespace Maze.Solver
             robot.ReachedExit += (_, __) => this.reachedEnd = true;
 
             this.findExit(0, 0);
+
+            // Tip: Consider writing `if (!reachedEnd)` instead of `... == false`
             if (this.reachedEnd == false)
             {
                 this.robot.HaltAndCatchFire();
             }
         }
 
+        // Tip: In C#, member names should start with a capital letter
         public void findExit(int x, int y)
         {
             //Solution 1: Finish
